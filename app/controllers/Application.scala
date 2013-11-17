@@ -41,6 +41,10 @@ object Application extends Controller {
   }
 
   def index = Action {
+    Ok(views.html.main())
+  }
+
+  def message = Action {
     counter = counter + 1
     val promiseOfMessage = Akka.future {
       Message(sayHello, counter)
@@ -48,9 +52,6 @@ object Application extends Controller {
     Async {
       promiseOfMessage.map(m => Ok(Json.toJson(m)))
     }
-    // val m = Message(sayHello, counter)
-    // Ok(Json.toJson(m))
-    // Ok(views.html.index("Your new application is ready."))
   }
 
 }
