@@ -3,15 +3,18 @@ package controllers
 import java.net._
 import java.lang._
 import play.api._
+import libs.concurrent.Akka
 import play.api.mvc._
 import org.jboss.jbossas.quickstarts.wshelloworld.helloworld.HelloWorldService_Service
 import play.api.libs.json._
 import play.api._
-import play.api.mvc._
-import play.api.libs.json._
 import models._
+import play.libs.F.Promise
+import play.api.Play.current
 
 object Application extends Controller {
+
+  var counter = 0
 
   private def sayHello: String = {
     var s: HelloWorldService_Service = null
@@ -38,8 +41,15 @@ object Application extends Controller {
   }
 
   def index = Action {
-    val m = Message(sayHello, 1)
-    Ok(Json.toJson(m))
+    counter = counter + 1
+    val promiseOfMessage = Akka.future {
+      Message(sayHello, counter)
+    }
+    Async {
+      promiseOfMessage.map(m => Ok(Json.toJson(m)))
+    }
+    // val m = Message(sayHello, counter)
+    // Ok(Json.toJson(m))
     // Ok(views.html.index("Your new application is ready."))
   }
 
